@@ -1,8 +1,8 @@
-const {check, validationResult} = require('express-validator');
+const {check, validationResult, body} = require('express-validator');
 const db = require('../models/index');
 const User = db.User;
 
-const ValidateUserRegistration = [
+const validateUserRegistration = [
     check('name')
         .trim()
         .escape()
@@ -58,7 +58,7 @@ const ValidateUserRegistration = [
     },
 ];
 
-const ValidateUserLogin = [
+const validateUserLogin = [
     check('email')
         .trim()
         .normalizeEmail()
@@ -81,4 +81,47 @@ const ValidateUserLogin = [
     },
 ];
 
-module.exports = {ValidateUserRegistration,ValidateUserLogin};
+
+const validateUserUpdate = [
+    body('name').if(body('name').exists())
+        .trim()
+        .escape()
+        .isLength({min: 3})
+        .withMessage('name should have at least 3 characters!'),
+    body('email').if(body('email').exists())
+        .trim()
+        .normalizeEmail()
+        .isEmail()
+        .withMessage('Invalid email address!')
+        .custom(async (value, {req}) => {
+            const user = await User.findOne({where: {email: value}});
+            if (user) {
+                return Promise.reject('E-mail already in use');
+            }
+        }),
+    body('password').if(body('password').exists())
+        .trim()
+        .isLength({min: 8})
+        .withMessage('Password should have at least 8 characters!')
+        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,1024}$/)
+        .withMessage('Password should have at least one uppercase letter, one lowercase letter and one number!'),
+    body('confirmPassword').if(body('confirmPassword').exists())
+        .trim()
+        .custom((value, {req}) => {
+            if (value !== req.body.password) {
+                throw new Error('Password confirmation does not match password');
+            }
+            return true;
+        })
+        .withMessage('Passwords and confirmPassword do not match!'),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty())
+            return res.status(422).json({errors: errors.array()});
+        next();
+    },
+];
+
+
+    module.exports = {validateUserRegistration, validateUserLogin, validateUserUpdate};

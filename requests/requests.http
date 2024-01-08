@@ -3,10 +3,10 @@ PUT http://localhost:8000/users
 Content-Type: application/json
 
 {
-    "name": "Jane Doe",
-    "email": "jane2@john.com",
-    "password": "Aa12345!",
-    "confirmPassword": "Aa12345!"
+  "name": "Jane Doe",
+  "email": "jane2@john.com",
+  "password": "Aa12345!",
+  "confirmPassword": "Aa12345!"
 }
 
 ### login
@@ -14,11 +14,21 @@ POST http://localhost:8000/users/login
 Content-Type: application/json
 
 {
-    "email": "jane2@john.com",
-      "password": "Aa12345!"
+  "email": "jane3@doe.com",
+  "password": "Aa12345!"
 }
 
-### get user profile
-GET http://localhost:8000/users
+### logout
+POST http://localhost:8000/users/logout
 Content-Type: application/json
-Cookie: 123
+
+### update user profile
+POST http://localhost:8000/users
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "email": "jane3@doe.com",
+  "password": "Aa12345!",
+  "confirmPassword": "Aa12345!"
+}
